@@ -1,0 +1,40 @@
+default:
+  image: node:10.17.0
+  before_script:
+    - npm install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - node_modules/
+
+stages:
+  - test
+  - build
+  - deploy
+
+test:
+  stage: test
+  script:
+    - npm test
+
+build:
+  stage: build
+  script:
+    - mkdir function
+    - ./node_modules/node-lambda/bin/node-lambda package -A function/
+  artifacts:
+    paths:
+      - function/
+    expire_in: 1 week
+
+deploy:
+  stage: deploy
+  image: python:latest
+  dependencies:
+    - build
+  before_script:
+    - pip install awscli
+  script:
+    - aws s3 cp function/lambda-cloudwatch-slack.zip s3://$S3_DEPLOY_BUCKET/
+  only:
+    - tags
