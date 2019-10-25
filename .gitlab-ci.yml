@@ -35,6 +35,6 @@ deploy:
   before_script:
     - pip install awscli
   script:
-    - aws s3 cp function/lambda-cloudwatch-slack.zip s3://$S3_DEPLOY_BUCKET/
+    - aws s3 cp --acl public-read function/lambda-cloudwatch-slack.zip s3://$S3_DEPLOY_BUCKET/
   only:
     - tags
